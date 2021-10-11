@@ -8,12 +8,14 @@ if __name__ == "__main__":
     epoch = 1
     containsErrors = True
 
-    signals = Data.generatedSignals(Data.signals, 4)
-    classes = Data.generatedClasses(5)
+    signals = Data.generatedSignals(Data.signals, 10)
+
+    print(signals)
+
     weights = Data.weights
 
     while epoch < epochs and containsErrors:
-        containsErrors = not perceptron.learningIteration(signals, classes, weights)
+        containsErrors = not perceptron.learningIteration(signals, weights)
         epoch = epoch + 1
     
     perceptron.plotErrors()

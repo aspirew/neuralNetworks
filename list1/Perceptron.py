@@ -21,12 +21,12 @@ class Perceptron:
     def defineClass(self, signals, weights, bias):
         return self.unipolarFunction(self.scalarSum(signals, weights), bias)
 
-    def learningIteration(self, signals, classes, weights):
-        for i in range(len(signals)):
-            Z = self.defineClass(signals[i], weights[-2:], weights[0])
-            self.errors.append(classes[i] - Z)
-            weights[1] += self.learnRate * self.errors[-1] * signals[i][0]
-            weights[2] += self.learnRate * self.errors[-1] * signals[i][1]
+    def learningIteration(self, signals, weights):
+        for s in signals:
+            Z = self.defineClass(s[0], weights[-2:], weights[0])
+            self.errors.append(s[1] - Z)
+            weights[1] += self.learnRate * self.errors[-1] * s[0][0]
+            weights[2] += self.learnRate * self.errors[-1] * s[0][1]
             weights[0] += self.learnRate * self.errors[-1]
         return all([e == 0 for e in self.errors[-4:]])
 
