@@ -2,8 +2,13 @@ from Data import Data
 import matplotlib.pyplot as plt
 
 class Perceptron:
-    errors = []
-    learnRate = 0.1
+
+    def __init__(self, learnRate, fun):
+        if(fun == "bipolar"):
+            self.usedFun = self.bipolarFunction
+        else:
+            self.usedFun = self.unipolarFunction
+        self.learnRate = learnRate        
 
     def scalarSum(self, signals, weights):
         return sum([s * w for s, w in zip(signals, weights)])
@@ -19,16 +24,21 @@ class Perceptron:
         return -1
 
     def defineClass(self, signals, weights, bias):
-        return self.unipolarFunction(self.scalarSum(signals, weights), bias)
+        return self.usedFun(self.scalarSum(signals, weights), bias)
 
     def learningIteration(self, signals, weights):
+        errorAppeared = False
+
         for s in signals:
             Z = self.defineClass(s[0], weights[-2:], weights[0])
-            self.errors.append(s[1] - Z)
-            weights[1] += self.learnRate * self.errors[-1] * s[0][0]
-            weights[2] += self.learnRate * self.errors[-1] * s[0][1]
-            weights[0] += self.learnRate * self.errors[-1]
-        return all([e == 0 for e in self.errors[-4:]])
+            error = s[1] - Z
+            if error != 0:
+                errorAppeared = True 
+                weights[1] += self.learnRate * error * s[0][0]
+                weights[2] += self.learnRate * error * s[0][1]
+                weights[0] += self.learnRate * error
+                
+        return errorAppeared
 
     def plotErrors(self):
         plt.plot(self.errors)
