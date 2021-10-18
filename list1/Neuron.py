@@ -1,5 +1,7 @@
 class Neuron:
     
+    learnRate = 0.1
+
     def scalarSum(self, signals, weights):
         return sum([s * w for s, w in zip(signals, weights)])
 

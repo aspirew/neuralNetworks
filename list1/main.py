@@ -2,7 +2,6 @@ from Adaline import Adaline
 from Data import Data
 from Perceptron import Perceptron
 import random
-import copy
 
 if __name__ == "__main__":
     
