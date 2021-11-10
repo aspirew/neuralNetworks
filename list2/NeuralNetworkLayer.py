@@ -107,8 +107,9 @@ class NeuralNetworkLayer():
 
         self.weightsArray = self.weightsArray - ((self.learnRate / batchSize) * self.weightsUpdateValue)
         self.biasArray = self.biasArray - ((self.learnRate / batchSize) * self.biasUpdateValue)
+
         
-        # after that operation weights must be cleaned so next epoch can gather new changes
+        # after that operation weights update value must be cleaned so next epoch can gather new changes
         self.weightsUpdateValue = []
         self.biasUpdateValue = []
 

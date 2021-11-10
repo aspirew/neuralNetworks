@@ -17,91 +17,64 @@ def generateNetwork(neuralNetwork, neuronsCounts, outputLayerSize, learnRate, ac
     neuralNetwork.getLastLayer().nextLayer = NeuralNetworkLayer(inputSize, outputLayerSize, learnRate, softMaxF, randomFun, randomFunParams)
 
 
-def speedAndEfficiencyTest(trainingData, testData):
+def hiddenLayersTest(trainingData, testData):
 
-    errs = []
-    passed = []
+    testCases = [[5], [10], [20], [30]]
 
-    neuralNetwork1 = NeuralNetworkLayer(inputVectorSize, 2, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork1, [], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork1)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+    testCases.append([5, 5])
+    testCases.append([5, 10, 20])
 
-    print(errs)
-    print(passed)
+    for case in testCases:
 
-    neuralNetwork2 = NeuralNetworkLayer(inputVectorSize, 4, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork2, [], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork2)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+        print("testing hidden layers", case)
 
-    print(errs)
-    print(passed)
+        neuralNetwork = NeuralNetworkLayer(inputVectorSize, case[0], 0.3, tanhF, normalDistribution, [0, 0.5])
+        generateNetwork(neuralNetwork, case[1:], 10, 0.3, tanhF, normalDistribution, [0, 0.5])
+        passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork)
 
+        plt.title(f"Ilość pomyślnych testów dla sieci {case}")
+        plt.xlabel("Epoka")
+        plt.ylabel("Liczba zdanych testów")
+        plt.plot(passedTestsList)
+        plt.savefig(f"results/images/efficency/error_learn_rate_{case}.png")
+        plt.clf()
 
-    neuralNetwork3 = NeuralNetworkLayer(inputVectorSize, 6, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork3, [], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork3)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+    for case in testCases:
 
-    neuralNetwork4 = NeuralNetworkLayer(inputVectorSize, 4, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork4, [3], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork4)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+        print("testing hidden layers", case)
 
-    neuralNetwork5 = NeuralNetworkLayer(inputVectorSize, 4, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork5, [3, 2], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork5)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+        neuralNetwork = NeuralNetworkLayer(inputVectorSize, case[0], 0.3, sigmoidF, normalDistribution, [0, 0.5])
+        generateNetwork(neuralNetwork, case[1:], 10, 0.3, sigmoidF, normalDistribution, [0, 0.5])
+        passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork)
 
-    neuralNetwork6 = NeuralNetworkLayer(inputVectorSize, 4, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    generateNetwork(neuralNetwork6, [3, 2, 5], 10, 0.05, sigmoidF, normalDistribution, [0, 0.5])
-    errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork6)
-    errs.append(len(errors))
-    passed.append(max(passedTestsList))
+        plt.title(f"Ilość pomyślnych testów dla sieci {case}")
+        plt.xlabel("Epoka")
+        plt.ylabel("Liczba zdanych testów")
+        plt.plot(passedTestsList)
+        plt.savefig(f"results/images/efficency/error_learn_rate_{case}.png")
+        plt.clf()
 
-
-    with open('results/speed.txt', 'w') as filehandle:
-        json.dump(errs, filehandle)
-
-    with open('results/efficiency.txt', 'w') as filehandle:
-        json.dump(passed, filehandle)
 
 def learnRateTest(trainingData, testData):
     
     for i in range(10):
 
-        learnRate = 0.005 * (i * 3 + 1)
+        learnRate = 0.1 * (i + 1)
+
         print("Testing learn rate", learnRate)
 
-        neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, learnRate, sigmoidF, normalDistribution, [0, 0.5])
-        generateNetwork(neuralNetwork, [3, 2], 10, learnRate, sigmoidF, normalDistribution, [0, 0.5])
-        errors, passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork)
-
-        plt.title(f"Wielkość błędu dla współczynnika {learnRate}")
-        plt.xlabel("Epoka")
-        plt.ylabel("Błąd")
-        plt.plot(errors)
-        plt.savefig(f"results/images/learnRate/error_learn_rate_{learnRate}.png")
-        plt.clf()
+        neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, learnRate, sigmoidF, normalDistribution, [0, 0.1])
+        generateNetwork(neuralNetwork, [3, 2], 10, learnRate, sigmoidF, normalDistribution, [0, 0.1])
+        passedTestsList = trainNeuralNetwork(trainingData, testData, neuralNetwork)
 
         plt.title(f"Ilość pomyślnych testów dla współczynnika {learnRate}")
         plt.xlabel("Epoka")
-        plt.ylabel("Ilość pomyślnych testów")
+        plt.ylabel("Liczba zdanych testów")
         plt.plot(passedTestsList)
         plt.savefig(f"results/images/learnRate/test_learn_rate_{learnRate}.png")
         plt.clf()
+    
 
-        with open('results/speedlr.txt', 'w') as filehandle:
-            json.dump(errors, filehandle)
-
-        with open('results/efficiencylr.txt', 'w') as filehandle:
-            json.dump(passedTestsList, filehandle)
 
 
 def batchSizeTest(trainingData, testData):
@@ -205,16 +178,14 @@ if __name__ == '__main__':
     # load mnist training data
     trainingData, testData = loadData()
     inputVectorSize = len(trainingData[0].inputs)
-    activationFunTest(trainingData, testData)
-
     
-    # # create first layer with 4 neurons
-    # neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, sigmoidF, normalDistribution, [0, 0.5])
+    # create first layer with 4 neurons
+    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, sigmoidF, normalDistribution, [0, 0.5])
 
-    # # add hidden layers of size 3 and 2 and output layer of size 10
-    # generateNetwork(neuralNetwork, [3, 2], 10, 0.1, sigmoidF, normalDistribution, [0, 0.5])
+    # add hidden layers of size 3 and 2 and output layer of size 10
+    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, sigmoidF, normalDistribution, [0, 0.5])
 
-    # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
+    # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
-    # # train neural network
-    # trainNeuralNetwork(trainingData, testData, neuralNetwork)
+    # train neural network
+    trainNeuralNetwork(trainingData, testData, neuralNetwork)
