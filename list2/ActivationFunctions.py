@@ -29,3 +29,6 @@ def softplusF():
 
 def ReLU(x):
     return numpy.max(0, x)
+
+def ReLUF():
+    return ReLU, softplusD

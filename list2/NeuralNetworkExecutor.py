@@ -1,8 +1,8 @@
+import sys
 from typing import List
 import numpy
 import random
-import matplotlib.pyplot as plt
-import sys
+from numpy.lib.function_base import copy
 
 from Loader import InputOutputSet, chunks
 
@@ -19,17 +19,19 @@ def neuralNetworkError(expectedOutputs, predictedOutputs):
 
 def negativeLogLikelihood(errors, expectedOutputs):
     return -numpy.log(numpy.sum(errors * expectedOutputs))
+    
 
-def trainNeuralNetwork(dataset: List[InputOutputSet], neuralNetwork, batchSize = 50, acceptedError = 0.7, numOfEpochs = 100):
+def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork, batchSize = 50, acceptedError = 1.3, numOfEpochs = 1000):
 
     epoch = 1
-    foundOptimalValues = False
     inputSize = len(dataset[0].inputs)
     batchSize = min(max(1, batchSize), inputSize)
     errors = []
+    passedTestsList = []
+    foundGoodResult = False
 
-    # execute while numOfEpochs is not exceeded and optimal value was not found yet
-    while (numOfEpochs > epoch and not foundOptimalValues): #or lastValidationError > validationErrorAcceptedValue:
+    # execute while numOfEpochs is not exceeded
+    while (numOfEpochs > epoch and not foundGoodResult):
 
         # shuffle dataset
         random.shuffle(dataset)
@@ -57,19 +59,30 @@ def trainNeuralNetwork(dataset: List[InputOutputSet], neuralNetwork, batchSize =
             # add error to batch error list
             batchErrorList.append(neuralNetworkError)
 
-        # when all batches are processed calculate average error
-        errors.append(numpy.average(batchErrorList))
+        # when all batches are processed calculate average error and check how well network can predict values
+        errors.append(numpy.mean(batchErrorList))
+        passedTestsList.append(testNeuralNetwork(testDataset, neuralNetwork))
 
         # increase epoch
         epoch = epoch + 1
+        #foundGoodResult = errors[-1] < acceptedError
 
-        # set optimal value flag
-        foundOptimalValues = errors[-1] < acceptedError
         print("█", end='')
         sys.stdout.flush()
 
+    print("")
+    return errors, passedTestsList
 
-    print(epoch)
-    plt.plot(errors)
-    plt.show()
 
+def testNeuralNetwork(dataset: List[InputOutputSet], neuralNetwork):
+
+    passedTests = 0
+    
+    for data in dataset:
+        output = neuralNetwork.propagateForward(data.inputs)
+        argmax = numpy.argmax(output)
+
+        if(argmax == data.output):
+            passedTests += 1
+
+    return copy(passedTests)
