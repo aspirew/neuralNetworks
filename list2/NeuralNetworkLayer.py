@@ -1,6 +1,6 @@
 import numpy
 
-from NeuralNetworkExecutor import lossFunctionGradient, softMax
+from NeuralNetworkExecutor import neuralNetworkError, softMax
 
 class NeuralNetworkLayer():
 
@@ -17,15 +17,14 @@ class NeuralNetworkLayer():
         self.derivative = None
         self.learnRate = learnRate
         self.error = None
+        self.weightsUpdateValue = []
+        self.biasUpdateValue = []
 
     def calculateActivationVector(self, inputs):
         self.inputs = inputs
         multiplied = numpy.matmul(self.weightsArray, inputs)
         summed = numpy.add(multiplied, self.biasArray)
-        if(self.nextLayer != None):
-            self.outputs = self.activationFun(summed)
-        else:
-            self.outputs = summed #softmax
+        self.outputs = self.activationFun(summed)
         return self.outputs
 
     def createWeightsBackup(self):
@@ -40,29 +39,65 @@ class NeuralNetworkLayer():
             return self.nextLayer.propagateForward(activationVector)
         return self.outputs
 
-    def propagateBackward(self, expectedOutputs, batchSize):
+    def propagateBackward(self, expectedOutputs):
         if(self.nextLayer != None):
-            self.nextLayer.propagateBackward(expectedOutputs, batchSize)
-        if(self.nextLayer == None):
-            self.derivative = lossFunctionGradient(self.outputs, expectedOutputs, self.inputs)
-        else:
-            self.derivative = self.activationFunDerivative(self.inputs)
-        self.updateWeights(batchSize)
+            err = self.nextLayer.propagateBackward(expectedOutputs)
+            self.derivative = self.activationFunDerivative(self.outputs)
+            self.saveWeightChange(expectedOutputs)
+            return err
+        self.saveWeightChange(expectedOutputs)
+        return self.error
 
-    def getRecursiveError(self):
+    def getRecursiveError(self, expectedOutputs):
+        # print("WEIGHTS: ", self.weightsArray.T)
+        # print("DER: ", self.derivative)
         if(self.nextLayer != None):
-            print(self.weightsArray.T)
-            print(self.derivative)
-            step = numpy.matmul(self.weightsArray.T, self.derivative)
-            return step * self.nextLayer.getRecursiveError()
-        return self.derivative
-        
+            # print("MULTIPLYING WEIGHTS OF ANOTHER LAYER")
+            # print(self.nextLayer.weightsArray.T)
+            # print("WITH ERROR OF ANOTHER LAYER")
+            # print(self.nextLayer.error)
+            # print("AND HADAMADA WITH MY DERIVATIVE")
+            # print(self.derivative)
+            self.error = numpy.matmul(self.nextLayer.weightsArray.T, self.nextLayer.error) * self.derivative
+            return self.error
+        self.error = neuralNetworkError(expectedOutputs, self.outputs)
+        return self.error
+
+    def saveWeightChange(self, expectedOutputs):
+        layerError = self.getRecursiveError(expectedOutputs)
+        updateVal = numpy.matmul(layerError, self.inputs.T)
+        if(len(self.weightsUpdateValue) > 0):
+            self.weightsUpdateValue += updateVal
+            self.biasUpdateValue += layerError
+        else:
+            self.weightsUpdateValue = updateVal
+            self.biasUpdateValue = layerError
+
     def updateWeights(self, batchSize):
-        print("der", self.derivative)
-        print("input", self.inputs.T)
-        print("steps", self.getRecursiveError())
-        layerError = numpy.matmul(self.getRecursiveError(), self.inputs.T)
-        self.weightsArray = self.weightsArray - ((self.learnRate / batchSize) * numpy.sum(layerError))
+        # print("MY INPUTS: ", self.inputs)
+        # print("MY OUTPUTS: ", self.outputs)
+        # print("MY WEIGHTS: ", self.weightsArray)
+        # print("EXPECTED OUTPUTS: ", expectedOutputs)
+        # self.createWeightsBackup()
+        # # print("der", self.derivative)
+        # # print("input", self.inputs.T)
+        # layerError = self.getRecursiveError(expectedOutputs)
+        # # print("error", self.getRecursiveError())
+        # print("ERROR OF MY LAYER IS: ")
+        # print(layerError)
+        # print("I WANT TO MULTIPLY IT WITH MY TRANSPOSED INPUTS")
+        # print(self.inputs.T)
+        # updateValue = numpy.matmul(layerError, self.inputs.T)
+        # print("AND I GET UPDATE VALUE")
+        # print(updateValue)
+        # print("SUM!")
+        # print(numpy.sum(updateValue))
+        # print("WEIGHTS BEFORE UPDATE")
+        # print(self.weightsArray)
+        self.weightsArray = self.weightsArray - ((self.learnRate / batchSize) * self.weightsUpdateValue)
+        self.biasArray = self.biasArray - ((self.learnRate / batchSize) * self.biasUpdateValue)
+        self.weightsUpdateValue = []
+        self.biasUpdateValue = []
 
     def getLastLayer(self):
         if(self.nextLayer != None):
