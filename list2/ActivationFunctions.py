@@ -28,7 +28,7 @@ def softplusF():
     return softplus, softplusD
 
 def ReLU(x):
-    return numpy.max(0, x)
+    return numpy.array(x).clip(0)
 
 def ReLUF():
     return ReLU, softplusD

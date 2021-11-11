@@ -21,17 +21,16 @@ def negativeLogLikelihood(errors, expectedOutputs):
     return -numpy.log(numpy.sum(errors * expectedOutputs))
     
 
-def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork, batchSize = 50, acceptedError = 1.3, numOfEpochs = 1000):
+def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork, batchSize = 50, numOfEpochs = 50):
 
     epoch = 1
     inputSize = len(dataset[0].inputs)
     batchSize = min(max(1, batchSize), inputSize)
     errors = []
     passedTestsList = []
-    foundGoodResult = False
 
     # execute while numOfEpochs is not exceeded
-    while (numOfEpochs > epoch and not foundGoodResult):
+    while (numOfEpochs > epoch):
 
         # shuffle dataset
         random.shuffle(dataset)
@@ -65,13 +64,12 @@ def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork
 
         # increase epoch
         epoch = epoch + 1
-        #foundGoodResult = errors[-1] < acceptedError
 
         print("█", end='')
         sys.stdout.flush()
 
     print("")
-    return errors, passedTestsList
+    return errors, numpy.mean(errors), passedTestsList, numpy.mean(passedTestsList)
 
 
 def testNeuralNetwork(dataset: List[InputOutputSet], neuralNetwork):
