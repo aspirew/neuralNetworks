@@ -10,6 +10,9 @@ def sigmoidF():
     return sigmoid, sigmoidD
 
 def tanh(x):
+    v = (numpy.exp(x) - numpy.exp(-x))/(numpy.exp(x) + numpy.exp(-x))
+    if(0 in v):
+        print(v)
     return (numpy.exp(x) - numpy.exp(-x))/(numpy.exp(x) + numpy.exp(-x))
 
 def tanhD(x):

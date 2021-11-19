@@ -2,9 +2,10 @@ from os import name
 import random
 import sys
 
-from numpy import tan
+from numpy import tan, tanh
 
 from ActivationFunctions import ReLUF, sigmoid, sigmoidF, softplusF, tanhF
+from LearningRateOptimizer import momentum, nestrovMomentum
 from Loader import loadData
 from NeuralNetworkExecutor import softMaxF, trainNeuralNetwork
 from NeuralNetworkLayer import NeuralNetworkLayer
@@ -179,15 +180,27 @@ if __name__ == '__main__':
     # load mnist training data
     trainingData, testData = loadData()
     inputVectorSize = len(trainingData[0].inputs)
-    batchSizeTest(trainingData, testData)
+    # batchSizeTest(trainingData, testData)
     
     # create first layer with 4 neurons
-    # neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, sigmoidF, normalDistribution, [0, 0.5])
+    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, normalDistribution, [0, 0.5])
 
     # # add hidden layers of size 3 and 2 and output layer of size 10
-    # generateNetwork(neuralNetwork, [3, 2], 10, 0.1, sigmoidF, normalDistribution, [0, 0.5])
+    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, normalDistribution, [0, 0.5])
 
     # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
     # # train neural network
-    # trainNeuralNetwork(trainingData, testData, neuralNetwork)
+    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum)
+
+    plt.xlabel("Epoka")
+    plt.ylabel("Błąd")
+    plt.plot(errors)
+    plt.show()
+    plt.clf()
+
+    plt.xlabel("Epoka")
+    plt.ylabel("Ilość pomyślnych testów")
+    plt.plot(passedTestsList)
+    plt.show()
+    plt.clf()
