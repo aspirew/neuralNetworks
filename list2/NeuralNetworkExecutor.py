@@ -9,7 +9,9 @@ from Loader import InputOutputSet, chunks
 errors = []
 
 def softMax(inputs):
-    return numpy.exp(inputs) / numpy.sum(numpy.exp(inputs))
+    inputs = numpy.clip(inputs, -700, 700)
+    exp = numpy.exp(inputs)
+    return exp / numpy.sum(exp)
 
 def softMaxF():
     return softMax, None
@@ -61,6 +63,7 @@ def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork
         # when all batches are processed calculate average error and check how well network can predict values
         errors.append(numpy.mean(batchErrorList))
         passedTestsList.append(testNeuralNetwork(testDataset, neuralNetwork))
+        neuralNetwork.setBatchEpochNum(1)
 
         # increase epoch
         epoch = epoch + 1

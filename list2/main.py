@@ -3,9 +3,10 @@ import random
 import sys
 
 from numpy import tan, tanh
+import numpy
 
 from ActivationFunctions import ReLUF, sigmoid, sigmoidF, softplusF, tanhF
-from LearningRateOptimizer import adagrad, momentum, nestrovMomentum
+from LearningRateOptimizer import adadelta, adagrad, adam, momentum, nestrovMomentum
 from Loader import loadData
 from NeuralNetworkExecutor import softMaxF, trainNeuralNetwork
 from NeuralNetworkLayer import NeuralNetworkLayer
@@ -191,7 +192,7 @@ if __name__ == '__main__':
     # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
     # # train neural network
-    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum, 1)
+    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None, adam, 50)
 
     plt.xlabel("Epoka")
     plt.ylabel("Błąd")

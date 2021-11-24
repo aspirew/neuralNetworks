@@ -35,33 +35,58 @@ def nestrovMomentum(neuralNetwork: NeuralNetworkLayer, batchSize):
 def adagrad(neuralNetwork: NeuralNetworkLayer, batchSize):
     eps = 0.00000001
 
-    if(len(neuralNetwork.weightsGradientSum) > 0):
-        neuralNetwork.weightsGradientSum += neuralNetwork.weightsUpdateValue
-        neuralNetwork.biasGradientSum += neuralNetwork.biasGradientSum
-    else:
-        neuralNetwork.weightsGradientSum = copy(neuralNetwork.weightsUpdateValue)
-        neuralNetwork.biasGradientSum = copy(neuralNetwork.biasUpdateValue)
+    neuralNetwork.optimizerWeights += (neuralNetwork.weightsUpdateValue / batchSize) ** 2
+    neuralNetwork.optimizerBias += (neuralNetwork.biasUpdateValue / batchSize) ** 2
 
-    neuralNetwork.weightsArray = neuralNetwork.weightsArray - ((neuralNetwork.learnRate / batchSize) / numpy.sqrt(neuralNetwork.weightsGradientSum ** 2 + eps)) * neuralNetwork.weightsUpdateValue
-    neuralNetwork.biasArray = neuralNetwork.biasArray - ((neuralNetwork.learnRate / batchSize) / numpy.sqrt(neuralNetwork.biasGradientSum ** 2 + eps)) * neuralNetwork.biasUpdateValue
+    neuralNetwork.lastWeightsArrayChange = neuralNetwork.learnRate / batchSize * neuralNetwork.weightsUpdateValue
+    neuralNetwork.lastBiasArrayChange = neuralNetwork.learnRate / batchSize * neuralNetwork.biasUpdateValue
+
+    neuralNetwork.weightsArray = neuralNetwork.weightsArray - (neuralNetwork.lastWeightsArrayChange / (numpy.sqrt(neuralNetwork.optimizerWeights) + eps))
+    neuralNetwork.biasArray = neuralNetwork.biasArray - (neuralNetwork.lastBiasArrayChange / (numpy.sqrt(neuralNetwork.optimizerBias) + eps))
+
 
 def adadelta(neuralNetwork: NeuralNetworkLayer, batchSize):
     eps = 0.00000001
     gamma = 0.9
 
-    if(len(neuralNetwork.lastLastWeightsArrayChangePrediction) > 0):
-        neuralNetwork.lastWeightsArrayChangePrediction = gamma * neuralNetwork.lastLastWeightsArrayChangePrediction + (1 - gamma) * neuralNetwork.lastWeightsArrayChange
-        neuralNetwork.lastBiasArrayChangePrediction = gamma * neuralNetwork.lastLastBiasArrayChangePrediction + (1 - gamma) * neuralNetwork.lastBiasArrayChange
-    
-    if(len(neuralNetwork.lastWeightsArrayChange) > 0):
-        neuralNetwork.lastLastWeightsArrayChangePrediction = copy(neuralNetwork.lastWeightsArrayChangePrediction)
-        neuralNetwork.lastLastBiasArrayChangePrediction = copy(neuralNetwork.lastBiasArrayChangePrediction)
+    update = neuralNetwork.weightsUpdateValue / batchSize
+    updateBias = neuralNetwork.biasUpdateValue / batchSize
 
-    else:
-        neuralNetwork.lastWeightsArrayChange = - (numpy.sqrt(neuralNetwork.lastLastWeightsArrayChangePrediction + eps) / numpy.sqrt((neuralNetwork.weightsUpdateValue ** 2) + eps)) * neuralNetwork.weightsUpdateValue
+    neuralNetwork.optimizerWeights = gamma * neuralNetwork.optimizerWeights + (1-gamma) * (update ** 2)
+    neuralNetwork.optimizerBias = gamma * neuralNetwork.optimizerBias + (1-gamma) * (updateBias ** 2)
 
-        neuralNetwork.lastWeightsArrayChange = - (neuralNetwork.learnRate / batchSize) * neuralNetwork.weightsUpdateValue
-        neuralNetwork.lastBiasArrayChange = - (neuralNetwork.learnRate / batchSize) * neuralNetwork.biasUpdateValue
+    weightsChange = - (numpy.sqrt(neuralNetwork.expectedSquaredChangeWeights + eps)) / (numpy.sqrt(neuralNetwork.optimizerWeights + eps))
+    biasChange = - (numpy.sqrt(neuralNetwork.expectedSquaredChangeBias + eps)) / (numpy.sqrt(neuralNetwork.optimizerBias + eps))
 
-        neuralNetwork.weightsArray = neuralNetwork.weightsArray + neuralNetwork.lastWeightsArrayChange
-        neuralNetwork.biasArray = neuralNetwork.biasArray + neuralNetwork.lastBiasArrayChange
+    neuralNetwork.weightsArray = neuralNetwork.weightsArray + weightsChange
+    neuralNetwork.biasArray = neuralNetwork.biasArray + biasChange
+
+    print(weightsChange)
+
+    neuralNetwork.expectedSquaredChangeWeights = gamma * neuralNetwork.expectedSquaredChangeWeights + (1 - gamma) * (weightsChange ** 2)
+    neuralNetwork.expectedSquaredChangeBias = gamma * neuralNetwork.expectedSquaredChangeBias + (1 - gamma) * (biasChange ** 2)
+
+def adam(neuralNetwork: NeuralNetworkLayer, batchSize):
+    eps = 0.00000001
+    beta1 = 0.9
+    beta2 = 0.999
+
+    update = neuralNetwork.weightsUpdateValue / batchSize
+    updateBias = neuralNetwork.biasUpdateValue / batchSize
+
+    neuralNetwork.optimizerWeights_m = beta1 * neuralNetwork.optimizerWeights_m + (1-beta1) * update
+    neuralNetwork.optimizerWeights = beta2 * neuralNetwork.optimizerWeights + (1-beta2) * (update ** 2)
+
+    neuralNetwork.optimizerBias_m = beta1 * neuralNetwork.optimizerBias_m + (1-beta1) * updateBias
+    neuralNetwork.optimizerBias = beta2 * neuralNetwork.optimizerBias + (1-beta2) * (updateBias ** 2)
+
+    weightsCorrection_m = neuralNetwork.optimizerWeights_m / (1 - numpy.power(beta1, neuralNetwork.batchEpochNum))
+    weightsCorrection_v = neuralNetwork.optimizerWeights / (1 - numpy.power(beta2, neuralNetwork.batchEpochNum))
+
+    biasCorrection_m = neuralNetwork.optimizerBias_m / (1 - numpy.power(beta1, neuralNetwork.batchEpochNum))
+    biasCorrection_v = neuralNetwork.optimizerBias / (1 - numpy.power(beta2, neuralNetwork.batchEpochNum))
+
+    neuralNetwork.batchEpochNum += 1
+
+    neuralNetwork.weightsArray = neuralNetwork.weightsArray - (neuralNetwork.learnRate * weightsCorrection_m) / (numpy.sqrt(weightsCorrection_v) + eps)
+    neuralNetwork.biasArray = neuralNetwork.biasArray - (neuralNetwork.learnRate * biasCorrection_m) / (numpy.sqrt(biasCorrection_v) + eps)
