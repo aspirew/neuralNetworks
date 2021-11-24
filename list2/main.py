@@ -5,7 +5,7 @@ import sys
 from numpy import tan, tanh
 
 from ActivationFunctions import ReLUF, sigmoid, sigmoidF, softplusF, tanhF
-from LearningRateOptimizer import momentum, nestrovMomentum
+from LearningRateOptimizer import adagrad, momentum, nestrovMomentum
 from Loader import loadData
 from NeuralNetworkExecutor import softMaxF, trainNeuralNetwork
 from NeuralNetworkLayer import NeuralNetworkLayer
@@ -183,15 +183,15 @@ if __name__ == '__main__':
     # batchSizeTest(trainingData, testData)
     
     # create first layer with 4 neurons
-    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, normalDistribution, [0, 0.5])
+    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, normalDistribution, [0, 0.1])
 
     # # add hidden layers of size 3 and 2 and output layer of size 10
-    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, normalDistribution, [0, 0.5])
+    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, normalDistribution, [0, 0.1])
 
     # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
     # # train neural network
-    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum)
+    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum, 1)
 
     plt.xlabel("Epoka")
     plt.ylabel("Błąd")

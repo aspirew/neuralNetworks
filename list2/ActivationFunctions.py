@@ -1,30 +1,33 @@
 import numpy
     
 def sigmoid(x):
+    x = numpy.clip(x, -700, 700)
     return 1 / (1 + numpy.exp(-x))
 
 def sigmoidD(x):
+    x = numpy.clip(x, -700, 700)
     return sigmoid(x) * (1 - sigmoid(x))
 
 def sigmoidF():
     return sigmoid, sigmoidD
 
 def tanh(x):
-    v = (numpy.exp(x) - numpy.exp(-x))/(numpy.exp(x) + numpy.exp(-x))
-    if(0 in v):
-        print(v)
+    x = numpy.clip(x, -700, 700)
     return (numpy.exp(x) - numpy.exp(-x))/(numpy.exp(x) + numpy.exp(-x))
 
 def tanhD(x):
+    x = numpy.clip(x, -700, 700)
     return (1 - numpy.power(x, 2))
 
 def tanhF():
     return tanh, tanhD
 
 def softplus(x):
+    x = numpy.clip(x, -700, 700)
     return numpy.log(1 + numpy.exp(x))
 
 def softplusD(x):
+    x = numpy.clip(x, -700, 700)
     return 1 / (1 + numpy.exp(-x))
 
 def softplusF():

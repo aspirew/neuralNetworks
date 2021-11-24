@@ -21,7 +21,7 @@ def negativeLogLikelihood(errors, expectedOutputs):
     return -numpy.log(numpy.sum(errors * expectedOutputs))
     
 
-def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork, momentum = None, batchSize = 10, numOfEpochs = 10):
+def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork, momentum = None, learnRateAdjustment = None, batchSize = 100, numOfEpochs = 10):
 
     epoch = 0
     inputSize = len(dataset[0].inputs)
@@ -53,7 +53,7 @@ def trainNeuralNetwork(dataset: List[InputOutputSet], testDataset, neuralNetwork
                 neuralNetwork.propagateBackward(data.getOutputAsArgmax())
 
             # update weights after batch processing
-            neuralNetwork.updateWeights(batchSize, momentum)
+            neuralNetwork.updateWeights(batchSize, momentum, learnRateAdjustment)
 
             # add error to batch error list
             batchErrorList.append(neuralNetworkError)

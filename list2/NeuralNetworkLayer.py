@@ -21,11 +21,14 @@ class NeuralNetworkLayer():
         self.learnRate = learnRate
         self.error = None
         self.weightsUpdateValue = []
+        self.weightsUpdateValuePrediction = []
         self.biasUpdateValue = []
-        self.lastWeightsArrayChange = []
-        self.lastBiasArrayChange = []
+        self.biasUpdateValuePrediction = []
+        self.lastWeightsArrayChange = self.biasArray * .0
+        self.lastBiasArrayChange = self.biasArray * .0
         self.weightsGradientSum = []
         self.biasGradientSum = []
+        self.momentumRate = 0.8
 
 
     def calculateActivationVector(self, inputs):
@@ -94,15 +97,21 @@ class NeuralNetworkLayer():
 
         # calculate update value: current layer multiplied with transposed current inputs
         updateVal = numpy.matmul(layerError, self.inputs.T)
+        # ################# or maybe update layer error
         # later weight update value is increased, or created
         if(len(self.weightsUpdateValue) > 0):
             self.weightsUpdateValue += updateVal
+            self.weightsUpdateValuePrediction += updateVal - self.momentumRate * self.lastWeightsArrayChange
             self.biasUpdateValue += layerError
+            self.biasUpdateValuePrediction += layerError - self.momentumRate * self.lastBiasArrayChange
         else:
             self.weightsUpdateValue = updateVal
-            self.biasUpdateValue = layerError
+            self.weightsUpdateValuePrediction = updateVal - self.momentumRate * self.lastWeightsArrayChange
+            self.biasUpdateValue = copy.copy(layerError)
+            self.biasUpdateValuePrediction = layerError - self.momentumRate * self.lastBiasArrayChange
 
-    def updateWeights(self, batchSize, momentum):
+
+    def updateWeights(self, batchSize, momentum, learnRateAdjustment):
 
         # backpropagation with each label increased weights update value.
         # this operation was repeated batch size times
@@ -111,38 +120,22 @@ class NeuralNetworkLayer():
         # this value is then substracted from arrays
 
         if(self.nextLayer != None):
-            self.nextLayer.updateWeights(batchSize, momentum)
+            self.nextLayer.updateWeights(batchSize, momentum, learnRateAdjustment)
 
         # calculate change with momentum
         if(momentum != None):
             momentum(self, batchSize)
+
+        elif(learnRateAdjustment != None):
+            learnRateAdjustment(self, batchSize)
     
         # calculate change without momentum otherwise
         else:
             self.weightsArray = self.weightsArray - (self.learnRate / batchSize) * self.weightsUpdateValue
             self.biasArray = self.biasArray - (self.learnRate / batchSize) * self.biasUpdateValue
-            
-
-    def predictChange(self, weightsIncrease, biasIncrease, batchSize):
-        data = Loader.learnDataCopy
-        random.shuffle(data)
-        print("copying")
-        copyOfSelf = copy.deepcopy(self)
-
-        # change updated weights by given increase value
-        copyOfSelf.updateWeights(batchSize, None)
-        copyOfSelf.weightsArray - weightsIncrease
-        copyOfSelf.biasArray - biasIncrease
-
-        # take random batch from data and calculate neural network
-        for label in data[:batchSize]:
-            # propagate data forward
-            copyOfSelf.propagateForward(label.inputs)
-            # propagate error backward
-            copyOfSelf.propagateBackward(label.getOutputAsArgmax())
-
-        # get predicted update values
-        return copyOfSelf.weightsUpdateValue, copyOfSelf.biasUpdateValue
+        
+        self.weightsUpdateValue = []
+        self.biasUpdateValue = []
 
     def getLastLayer(self):
         if(self.nextLayer != None):
