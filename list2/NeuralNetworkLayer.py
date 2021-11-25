@@ -26,10 +26,10 @@ class NeuralNetworkLayer():
         self.biasUpdateValuePrediction = []
         self.lastWeightsArrayChange = self.weightsArray * .0
         self.lastBiasArrayChange = self.biasArray * .0
-        self.adadelta_w_s = self.weightsArray * .0
-        self.adadelta_b_s = self.biasArray * .0
-        self.adadelta_w_d = self.weightsArray * .0
-        self.adadelta_b_d = self.biasArray * .0
+        self.expectedGradientWeights = self.weightsArray * .0
+        self.expectedGradientBias = self.biasArray * .0
+        self.previousChangeWeights = self.weightsArray * .0
+        self.previousChangeBias = self.biasArray * .0
         self.optimizerWeights = self.weightsArray * .0
         self.optimizerBias = self.biasArray * .0
         self.optimizerWeights_m = self.weightsArray * .0

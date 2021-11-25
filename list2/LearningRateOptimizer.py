@@ -49,15 +49,17 @@ def adadelta(neuralNetwork: NeuralNetworkLayer, batchSize):
     eps = 0.00000001
     gamma = 0.9
 
-    neuralNetwork.adadelta_w_s = gamma * neuralNetwork.adadelta_w_s + (1 - gamma) * (neuralNetwork.weightsUpdateValue ** 2)
-    neuralNetwork.adadelta_b_s = gamma * neuralNetwork.adadelta_b_s + (1 - gamma) * (neuralNetwork.biasUpdateValue ** 2)
+    neuralNetwork.expectedGradientWeights = gamma * neuralNetwork.expectedGradientWeights + (1 - gamma) * (neuralNetwork.weightsUpdateValue ** 2)
+    neuralNetwork.expectedGradientBias = gamma * neuralNetwork.expectedGradientBias + (1 - gamma) * (neuralNetwork.biasUpdateValue ** 2)
 
-    neuralNetwork.weightsUpdateValue *= numpy.sqrt(neuralNetwork.adadelta_w_d + eps) / numpy.sqrt(neuralNetwork.adadelta_w_s + eps)
-    neuralNetwork.biasUpdateValue *= numpy.sqrt(neuralNetwork.adadelta_b_d + eps) / numpy.sqrt(neuralNetwork.adadelta_b_s + eps)
+    neuralNetwork.weightsUpdateValue *= numpy.sqrt(neuralNetwork.previousChangeWeights + eps) / numpy.sqrt(neuralNetwork.expectedGradientWeights + eps)
+    neuralNetwork.biasUpdateValue *= numpy.sqrt(neuralNetwork.previousChangeBias + eps) / numpy.sqrt(neuralNetwork.expectedGradientBias + eps)
 
-    neuralNetwork.adadelta_w_d = gamma * neuralNetwork.adadelta_w_d + (1 - gamma) * (neuralNetwork.weightsUpdateValue ** 2)
-    neuralNetwork.adadelta_b_d = gamma * neuralNetwork.adadelta_b_d + (1 - gamma) * (neuralNetwork.biasUpdateValue ** 2)
+    neuralNetwork.previousChangeWeights = gamma * neuralNetwork.previousChangeWeights + (1 - gamma) * (neuralNetwork.weightsUpdateValue ** 2)
+    neuralNetwork.previousChangeBias = gamma * neuralNetwork.previousChangeBias + (1 - gamma) * (neuralNetwork.biasUpdateValue ** 2)
 
+    neuralNetwork.weightsArray = neuralNetwork.weightsArray - neuralNetwork.weightsUpdateValue
+    neuralNetwork.biasArray = neuralNetwork.biasArray - neuralNetwork.biasUpdateValue
 
 def adam(neuralNetwork: NeuralNetworkLayer, batchSize):
     eps = 0.00000001

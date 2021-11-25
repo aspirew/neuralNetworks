@@ -186,10 +186,10 @@ if __name__ == '__main__':
     # # batchSizeTest(trainingData, testData)
     
     # # create first layer with 4 neurons
-    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.01, tanhF, he, [])
+    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, xavier, [3])
 
     # # # add hidden layers of size 3 and 2 and output layer of size 10
-    generateNetwork(neuralNetwork, [3, 2], 10, 0.01, tanhF, he, [])
+    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, xavier, [])
 
     # # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
