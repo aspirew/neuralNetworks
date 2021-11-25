@@ -10,13 +10,15 @@ from LearningRateOptimizer import adadelta, adagrad, adam, momentum, nestrovMome
 from Loader import loadData
 from NeuralNetworkExecutor import softMaxF, trainNeuralNetwork
 from NeuralNetworkLayer import NeuralNetworkLayer
-from WeightsGenerator import normalDistribution
+from WeightsGenerator import he, normalDistribution, xavier
 import matplotlib.pyplot as plt
 import json
     
 def generateNetwork(neuralNetwork, neuronsCounts, outputLayerSize, learnRate, activationFun, randomFun, randomFunParams):
     inputSize = neuralNetwork.numOfNeurons
-    for nc in neuronsCounts:
+    for i, nc in enumerate(neuronsCounts):
+        if(randomFun == xavier):
+            randomFunParams = [outputLayerSize if i >= len(neuronsCounts)-1 else neuronsCounts[i + 1]]
         neuralNetwork.getLastLayer().nextLayer = NeuralNetworkLayer(inputSize, nc, learnRate, activationFun, randomFun, randomFunParams)
         inputSize = nc
     neuralNetwork.getLastLayer().nextLayer = NeuralNetworkLayer(inputSize, outputLayerSize, learnRate, softMaxF, randomFun, randomFunParams)
@@ -178,21 +180,21 @@ if __name__ == '__main__':
     seed = random.randrange(sys.maxsize)
     random.seed(seed)
 
-    # load mnist training data
+    # # load mnist training data
     trainingData, testData = loadData()
     inputVectorSize = len(trainingData[0].inputs)
-    # batchSizeTest(trainingData, testData)
+    # # batchSizeTest(trainingData, testData)
     
-    # create first layer with 4 neurons
-    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, normalDistribution, [0, 0.1])
+    # # create first layer with 4 neurons
+    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.01, tanhF, he, [])
 
-    # # add hidden layers of size 3 and 2 and output layer of size 10
-    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, normalDistribution, [0, 0.1])
+    # # # add hidden layers of size 3 and 2 and output layer of size 10
+    generateNetwork(neuralNetwork, [3, 2], 10, 0.01, tanhF, he, [])
 
-    # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
+    # # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
-    # # train neural network
-    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None, adam, 50)
+    # # # train neural network
+    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None, adadelta)
 
     plt.xlabel("Epoka")
     plt.ylabel("Błąd")
