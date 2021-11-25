@@ -24,14 +24,18 @@ class NeuralNetworkLayer():
         self.weightsUpdateValuePrediction = []
         self.biasUpdateValue = []
         self.biasUpdateValuePrediction = []
-        self.lastWeightsArrayChange = copy.copy(self.weightsArray) * .0
-        self.lastBiasArrayChange = copy.copy(self.biasArray) * .0
-        self.optimizerWeights = copy.copy(self.weightsArray) * .0
-        self.optimizerBias = copy.copy( self.biasArray) * .0
-        self.optimizerWeights_m = copy.copy(self.weightsArray) * .0
-        self.optimizerBias_m = copy.copy(self.biasArray) * 0.
-        self.expectedSquaredChangeWeights = copy.copy(self.weightsArray) * .0
-        self.expectedSquaredChangeBias = copy.copy(self.biasArray) * .0
+        self.lastWeightsArrayChange = self.weightsArray * .0
+        self.lastBiasArrayChange = self.biasArray * .0
+        self.adadelta_w_s = self.weightsArray * .0
+        self.adadelta_b_s = self.biasArray * .0
+        self.adadelta_w_d = self.weightsArray * .0
+        self.adadelta_b_d = self.biasArray * .0
+        self.optimizerWeights = self.weightsArray * .0
+        self.optimizerBias = self.biasArray * .0
+        self.optimizerWeights_m = self.weightsArray * .0
+        self.optimizerBias_m = self.biasArray * 0.
+        self.expectedSquaredChangeWeights = self.weightsArray * .0
+        self.expectedSquaredChangeBias = self.biasArray * .0
         self.batchEpochNum = 1
         self.momentumRate = 0.8
 
