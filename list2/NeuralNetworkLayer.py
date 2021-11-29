@@ -3,6 +3,7 @@ import numpy
 import copy
 
 from NeuralNetworkExecutor import neuralNetworkError
+from WeightsGenerator import he, xavier
 import Loader
 
 class NeuralNetworkLayer():
@@ -10,7 +11,7 @@ class NeuralNetworkLayer():
     def __init__(self, inputSize, numOfNeurons, learnRate, activationFun, weightsGenerationFun, weightsGenerationParams):
         self.numOfNeurons = numOfNeurons
         self.weightsArray = weightsGenerationFun(inputSize, numOfNeurons, *weightsGenerationParams)
-        self.biasArray = weightsGenerationFun(1, numOfNeurons, *weightsGenerationParams)
+        self.biasArray = numpy.zeros((numOfNeurons, 1)) if(weightsGenerationFun == xavier or weightsGenerationFun == he) else weightsGenerationFun(1, numOfNeurons, *weightsGenerationParams)
         self.weightsBackup = numpy.copy(self.weightsArray)
         self.activationFun = activationFun()[0]
         self.activationFunDerivative = activationFun()[1]
@@ -106,7 +107,7 @@ class NeuralNetworkLayer():
 
         # calculate update value: current layer multiplied with transposed current inputs
         updateVal = numpy.matmul(layerError, self.inputs.T)
-        # ################# or maybe update layer error
+
         # later weight update value is increased, or created
         if(len(self.weightsUpdateValue) > 0):
             self.weightsUpdateValue += updateVal
@@ -120,7 +121,7 @@ class NeuralNetworkLayer():
             self.biasUpdateValuePrediction = layerError - self.momentumRate * self.lastBiasArrayChange
 
 
-    def updateWeights(self, batchSize, momentum, learnRateAdjustment):
+    def updateWeights(self, batchSize, optimizer):
 
         # backpropagation with each label increased weights update value.
         # this operation was repeated batch size times
@@ -129,14 +130,10 @@ class NeuralNetworkLayer():
         # this value is then substracted from arrays
 
         if(self.nextLayer != None):
-            self.nextLayer.updateWeights(batchSize, momentum, learnRateAdjustment)
+            self.nextLayer.updateWeights(batchSize, optimizer)
 
-        # calculate change with momentum
-        if(momentum != None):
-            momentum(self, batchSize)
-
-        elif(learnRateAdjustment != None):
-            learnRateAdjustment(self, batchSize)
+        if(optimizer != None):
+            optimizer(self, batchSize)
     
         # calculate change without momentum otherwise
         else:

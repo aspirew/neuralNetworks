@@ -18,9 +18,11 @@ def generateNetwork(neuralNetwork, neuronsCounts, outputLayerSize, learnRate, ac
     inputSize = neuralNetwork.numOfNeurons
     for i, nc in enumerate(neuronsCounts):
         if(randomFun == xavier):
-            randomFunParams = [outputLayerSize if i >= len(neuronsCounts)-1 else neuronsCounts[i + 1]]
+            randomFunParams = [outputLayerSize if i > len(neuronsCounts)-1 else neuronsCounts[i + 1]]
         neuralNetwork.getLastLayer().nextLayer = NeuralNetworkLayer(inputSize, nc, learnRate, activationFun, randomFun, randomFunParams)
         inputSize = nc
+    if(randomFun == xavier):
+        randomFunParams = [0]
     neuralNetwork.getLastLayer().nextLayer = NeuralNetworkLayer(inputSize, outputLayerSize, learnRate, softMaxF, randomFun, randomFunParams)
 
 
@@ -175,6 +177,111 @@ def activationFunTest(trainingData, testData):
         print(avgError)
         print(avgPass)
 
+def optimizerTests(trainingData, testData):
+
+    optimizers = [adagrad]
+    activationFuncs = [sigmoidF]
+
+    for activation in activationFuncs:
+        for optimizer in optimizers:
+            totalErrors = []
+            totalPassedTests = []
+            avgAvgError = 0
+            avgAvgPass = 0
+            for _ in range(10):
+                neuralNetwork = NeuralNetworkLayer(inputVectorSize, 20, 0.01, activation, normalDistribution, [0, 0.1])
+                generateNetwork(neuralNetwork, [], 10, 0.01, activation, normalDistribution, [0, 0.1])
+                errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, optimizer)
+
+                if(len(totalErrors) < 1):
+                    totalErrors = errors
+                    totalPassedTests = passedTestsList
+                else:
+                    for i in range(len(totalErrors)):
+                        totalErrors[i] += errors[i]
+                        totalPassedTests[i] += passedTestsList[i]
+                avgAvgError += avgError
+                avgAvgPass += avgPass
+
+            for i in range(len(totalErrors)):
+                totalErrors[i] = totalErrors[i] / 10
+                totalPassedTests[i] = totalPassedTests[i] / 10
+
+            name1 = optimizer.__name__ if(optimizer is not None) else "none"
+            name2 = activation.__name__
+
+            plt.title(f"Wielkość błędu dla {optimizer.__name__ if(optimizer is not None) else 'braku optymalizatora'} oraz {name2}")
+            plt.xlabel("Epoka")
+            plt.ylabel("Błąd")
+            plt.plot(totalErrors)
+            plt.savefig(f"report/images/error_{name1}_{name2}.png")
+            plt.clf()
+
+            plt.title(f"Ilość pomyślnych testów dla {optimizer.__name__ if(optimizer is not None) else 'braku optymalizatora'} oraz {name2}")
+            plt.xlabel("Epoka")
+            plt.ylabel("Ilość pomyślnych testów")
+            plt.plot(totalPassedTests)
+            plt.savefig(f"report/images/test_{name1}_{name2}.png")
+            plt.clf()
+
+            print(avgAvgError / 10)
+            print(avgAvgPass / 10)
+
+
+def weightsInitTest(trainingData, testData):
+
+    weightInits = [xavier, he]
+    activationFuncs = [softplusF]
+
+    for activation in activationFuncs:
+        for weightInit in weightInits:
+            totalErrors = []
+            totalPassedTests = []
+            avgAvgError = 0
+            avgAvgPass = 0
+            for _ in range(10):
+                if(weightInit == xavier):
+                    s = [10]
+                else:
+                    s = []
+                neuralNetwork = NeuralNetworkLayer(inputVectorSize, 20, 0.01, activation, weightInit, s)
+                generateNetwork(neuralNetwork, [], 10, 0.01, activation, weightInit, [])
+                errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum)
+
+                if(len(totalErrors) < 1):
+                    totalErrors = errors
+                    totalPassedTests = passedTestsList
+                else:
+                    for i in range(len(totalErrors)):
+                        totalErrors[i] += errors[i]
+                        totalPassedTests[i] += passedTestsList[i]
+                avgAvgError += avgError
+                avgAvgPass += avgPass
+
+            for i in range(len(totalErrors)):
+                totalErrors[i] = totalErrors[i] / 10
+                totalPassedTests[i] = totalErrors[i] / 10
+
+            name1 = weightInit.__name__
+            name2 = "ReLU"
+
+            plt.title(f"Wielkość błędu dla {name1} oraz {name2}")
+            plt.xlabel("Epoka")
+            plt.ylabel("Błąd")
+            plt.plot(totalErrors)
+            plt.savefig(f"report/images/error_{name1}_{name2}.png")
+            plt.clf()
+
+            plt.title(f"Ilość pomyślnych testów dla {name1} oraz {name2}")
+            plt.xlabel("Epoka")
+            plt.ylabel("Ilość pomyślnych testów")
+            plt.plot(totalPassedTests)
+            plt.savefig(f"report/images/test_{name1}_{name2}.png")
+            plt.clf()
+
+            print(avgAvgError / 10)
+            print(avgAvgPass / 10)
+
 if __name__ == '__main__':
 
     seed = random.randrange(sys.maxsize)
@@ -183,27 +290,28 @@ if __name__ == '__main__':
     # # load mnist training data
     trainingData, testData = loadData()
     inputVectorSize = len(trainingData[0].inputs)
-    # # batchSizeTest(trainingData, testData)
+    optimizerTests(trainingData, testData)
+    # weightsInitTest(trainingData, testData)
     
     # # create first layer with 4 neurons
-    neuralNetwork = NeuralNetworkLayer(inputVectorSize, 4, 0.1, tanhF, xavier, [3])
+    # neuralNetwork = NeuralNetworkLayer(inputVectorSize, 20, 0.01, sigmoidF, normalDistribution, [0, 0.1])
 
     # # # add hidden layers of size 3 and 2 and output layer of size 10
-    generateNetwork(neuralNetwork, [3, 2], 10, 0.1, tanhF, xavier, [])
+    # generateNetwork(neuralNetwork, [], 10, 0.01, sigmoidF, normalDistribution, [0, 0.1])
 
-    # # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
+    # # generated network is of sizes: * -> 4 -> 3 -> 2 -> 10
 
-    # # # train neural network
-    errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None, adadelta)
+    # # train neural network
+    # errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None, 500, 10)
 
-    plt.xlabel("Epoka")
-    plt.ylabel("Błąd")
-    plt.plot(errors)
-    plt.show()
-    plt.clf()
+    # plt.xlabel("Epoka")
+    # plt.ylabel("Błąd")
+    # plt.plot(errors)
+    # plt.show()
+    # plt.clf()
 
-    plt.xlabel("Epoka")
-    plt.ylabel("Ilość pomyślnych testów")
-    plt.plot(passedTestsList)
-    plt.show()
-    plt.clf()
+    # plt.xlabel("Epoka")
+    # plt.ylabel("Ilość pomyślnych testów")
+    # plt.plot(passedTestsList)
+    # plt.show()
+    # plt.clf()
