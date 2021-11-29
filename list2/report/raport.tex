@@ -27,17 +27,14 @@
 \maketitle
 
 \begin{abstract}
-  Celem ćwiczenia jest zapoznanie się z siecią wielowarstwową, uczeniem sieci za 
-  pomocą algorytmu propagacji wstecznej w wersji klasycznej (minimalizacja błędu) 
-  średniokwadratowego oraz wpływem parametrów odgrywających istotną rolę w uczeniu 
-  sieci z propagacją wsteczną. Eksperymenty przeprowadzono na zbiorze MNIST zawierającym 60000 danych treningowych
-  oraz 10000 danych testowych.
+  Celem ćwiczenia jest zapoznanie się technikami poprawiającymi szybkość uczenia sieci. Eksperymenty przeprowadzono na zbiorze
+  MNIST zawierającym 60000 danych treningowych oraz 10000 danych testowych. Każdy test przeprowadzono 10 razy, a wyniki uśredniono.
 \end{abstract}
 
 Kod źródłowy znajduje się w poniższym linku:
 
 \begin{center}
-  \url{https://github.com/aspirew/neuralNetworks/tree/list2}
+  \url{https://github.com/aspirew/neuralNetworks/tree/list3}
 \end{center}
 
 \newpage
@@ -47,21 +44,22 @@ Za domyślne hiperparametry przyjęto:
 
 \begin{itemize}
   \item Wielkość sieci: [20]
-  \item Współczynnik uczenia: 0.3
-  \item Funkcja aktywacji: tangens hiperboliczy
+  \item Współczynnik uczenia: 0.01
   \item Inicjalizacja wag za pomocą rozkładu normalnego o parametrach:
   \subitem mi: 0
-  \subitem sigma: 0.5
+  \subitem sigma: 0.1
 \end{itemize}
 
 Każdy test przeszedł przez 50 epok zanim został zakończony.
 
-\subsection{Test wielkości sieci}
+\section{Test optymalizatorów współczynnika uczenia}
 
-Zbadano jak wielkości sieci - liczba warstw wraz z liczbą neuronów w warstwach wpływa na skuteczność i szybkość uczenia.
-Zapis [5, 7] oznacza sieć neuronową z dwoma warstwami ukrytmi, z czego pierwsza zawiera 5 neuronów, a druga 7.
-Ilość neuronów na wyjściu wynosi zawsze 10. W tabelce zawarty jest uśredniony błąd oraz oraz uśredniona liczba prawidłowo rozpoznanych
-liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
+Zbadano jak podane w ćwiczeniu optymaliztory wpływają na skuteczność i szybkość uczenia. Wyniki działania optymalizatorów porównano
+z wnikami bez ich użycia. Optymaliztory przetestowano na dwóch funkcjach aktywacji: sigmoidalnej i ReLU. W
+tabelach zawarte są uśrednione błędy oraz oraz uśredniona liczba prawidłowo rozpoznanych liczb ze
+zbioru testowego. Niżej przedstawione są wyniki na wykresach
+
+\subsection{Funkcja sigmoidalna}
 
 \begin{table}[h]
   \centering
@@ -70,85 +68,99 @@ liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
   \def\arraystretch{1.3}
 \begin{tabular}{|l|l|l|}
 \hline
-Wielkość & Błąd & Skuteczność \\ \hline
-{[}5{]} & 0.478 & 8594 \\ \hline
-{[}10{]} & 0.27 & 9176 \\ \hline
-{[}20{]} & 0.15 & 9374 \\ \hline
-{[}30{]} & 0.11 & 9496 \\ \hline
-{[}5, 5{]} & 0.5 & 8548 \\ \hline
-{[}5, 10, 20{]} & 0.45 & 8659 \\ \hline
+Optymalizator & Błąd & Skuteczność \\ \hline
+Brak & 1.43 & 6649.3 \\ \hline
+Momentum & 0.81 & 7923 \\ \hline
+Momentum Nesterova & 0.81 & 7956.9 \\ \hline
+Adagrad & 0.91 & 7583.8 \\ \hline
+Adadelta & 0.83 & 7764.9 \\ \hline
+Adam & 0.65 & 7946.4 \\ \hline
 \end{tabular}
   \egroup
   \vspace{10pt}
-  \caption{Wielkość sieci}
+  \caption{Optymalizatory - funkcja sigmoidalna}
 \end{table}
 
-\begin{figure}[]
+\newpage
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[5].png}
+  \includegraphics[width=\linewidth]{error_none_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[5].png}
+  \includegraphics[width=\linewidth]{test_none_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+W przypadku braku optymalizatora można zauważyć, że wykres błędu zmniejsza się powoli, a sam średni błąd jest
+na wysokim poziomie.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[10].png}
+  \includegraphics[width=\linewidth]{error_momentum_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[10].png}
+  \includegraphics[width=\linewidth]{test_momentum_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+Metoda momentum wyraźnie zwiększa szybkość uczenia sieci - wykres szybciej schodzi do optimum. Ilość pomyślnych testów
+jest na podobnym poziomie jak przy braku optymalizatora, jednak graniczna wartość osiągnięta jest znacznie szybciej.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[20].png}
+  \includegraphics[width=\linewidth]{error_nestrovMomentum_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[20].png}
+  \includegraphics[width=\linewidth]{test_nestrovMomentum_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+Momentum Nesterova daje zbliżone wyniki jak zwykłe momentum - ponownie widać poprawę względem braku optymalizatora.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[30].png}
+  \includegraphics[width=\linewidth]{error_adagrad_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[30].png}
+  \includegraphics[width=\linewidth]{test_adagrad_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+Optymalizator adagrad działa dość niestabilnie. Błąd spada szybciej niż w przypadku braku optymalizatora.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[5, 5].png}
+  \includegraphics[width=\linewidth]{error_adadelta_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[5, 5].png}
+  \includegraphics[width=\linewidth]{test_adadelta_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+Ustabilizowanie można zauważyć w przypadku optymalizatora adadelta. Widać poprawę względem adagrad.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/error_hidden_layer_[5, 10, 20].png}
+  \includegraphics[width=\linewidth]{error_adam_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{hiddenLayer/passedTest_learn_rate_[5, 10, 20].png}
+  \includegraphics[width=\linewidth]{test_adam_sigmoidF.png}
 \end{figure}
+
+Optymalizator adam nie osiągnął najlepszej średniej wartości błędu. Na wykresie widać jednak, że osiąga on optimum zdecydowanie najszybciej - do tego stopnia że po 20 epoce
+można zauważyć objawy przeuczenia się sieci, co skutkowało pogorszeniem średnich wyników.
 
 
 \newpage
-\subsection{Test wielkości współczynnika uczenia}
-
-Zbadano jak współczynnik uczenia wpływa na spadek błędu i skuteczność sieci. W tabelce zawarty jest uśredniony błąd oraz oraz uśredniona liczba prawidłowo rozpoznanych
-liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
+\subsection{Funkcja ReLU}
 
 \begin{table}[h]
   \centering
@@ -157,108 +169,103 @@ liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
   \def\arraystretch{1.3}
   \begin{tabular}{|l|l|l|}
   \hline
-  Współczynnik uczenia & Błąd & Skuteczność \\ \hline
-  {0.01} & 0.478 & 8594 \\ \hline
-  {0.05} & 0.27 & 9176 \\ \hline
-  {0.1} & 0.2 & 9309 \\ \hline
-  {0.2} & 0.17 & 9320 \\ \hline
-  {0.3} & 0.15 & 9401 \\ \hline
-  {0.5} & 0.13 & 9441 \\ \hline
-  {0.75} & 0.15 & 9395 \\ \hline
-  {1} & 0.16 & 9353 \\ \hline
-  \end{tabular}
+  Optymalizator & Błąd & Skuteczność \\ \hline
+  Brak & 0.6 & 8450.87 \\ \hline
+  Momentum & 0.34 & 9104.6 \\ \hline
+  Momentum Nesterova & 0.35 & 9109.2 \\ \hline
+  Adagrad & 0.26 & 9276.0 \\ \hline
+  Adadelta & 0.32 & 9174.3 \\ \hline
+  Adam & 0.13 & 9526.7 \\ \hline
+  \end{tabular} 
   \egroup
   \vspace{10pt}
-  \caption{Współczynnik uczenia}
+  \caption{Optymalizatory - funkcja ReLU}
 \end{table}
 
 \newpage
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.01.png}
+  \includegraphics[width=\linewidth]{error_none_ReLU.png}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.01.png}
+  \includegraphics[width=\linewidth]{test_none_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+Można zauważyć, że funkcja aktywacji ReLU radzi sobie lepiej niż funkcja sigmoidalna. Wykres szybciej osiąga 
+optimum pomimo tego, że nie zastosowano żadnego optymalizatora.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.05.png}
+  \includegraphics[width=\linewidth]{error_momentum_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.05.png}
+  \includegraphics[width=\linewidth]{test_momentum_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+Wydajność jest jeszcze lepsza, dzięki zastosowaniu momentum - wykres szybciej zbiega do optimum.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.1.png}
+  \includegraphics[width=\linewidth]{error_nestrovMomentum_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.1.png}
+  \includegraphics[width=\linewidth]{test_nestrovMomentum_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+Ponownie momentum Nesterova prezentuje zbliżone wyniki do momentum.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.2.png}
+  \includegraphics[width=\linewidth]{error_adagrad_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.2.png}
+  \includegraphics[width=\linewidth]{test_adagrad_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+Jak w przypadku funkcji sigmoidalnej, tak i dla funkcji ReLU adagrad wyznacza się niestabilnością.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.3.png}
+  \includegraphics[width=\linewidth]{error_adadelta_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.3.png}
+  \includegraphics[width=\linewidth]{test_adadelta_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+Adadelta szybko zbiega do optimum, a wykres jest bardziej stabilny niż to było w przypadku adagrad. Średnie wyniki są jednak gorsze - w odróżnieniu do funkcji sigmoidalnej.
+
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.5.png}
+  \includegraphics[width=\linewidth]{error_adam_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
+\begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.5.png}
+  \includegraphics[width=\linewidth]{test_adam_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_0.75.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_0.75.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{learnRate/error_learn_rate_1.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{learnRate/test_learn_rate_1.png}
-\end{figure}
-
+Wydawać by się mogło, że adam wykazuje się niestabilnością - wynika to jednak ze zmniejszonej skali, gdyż wyniki są wyjątkowo dobre.
+Błąd rzędu 0.1 oraz skuteczność ponad 95\% pokazują skuteczność tego optymalizatora.
 
 \newpage
-\subsection{Test wielkości paczki}
+\section{Inicjalizacja wag sieci}
 
-Zbadano jak wielkość paczki wpływa na spadek błędu i skuteczność sieci. W tabelce zawarty jest uśredniony błąd oraz oraz uśredniona liczba prawidłowo rozpoznanych
-liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
+Zbadano jak różne sposoby inicjalizacji wag w sieci wpływają na skuteczność i szybkość uczenia. 
+Do optymalizacji nie użyto żadnego optymalizatora.
+W tabelach zawarte są uśrednione błędy oraz oraz uśredniona liczba prawidłowo rozpoznanych liczb ze
+zbioru testowego. Niżej przedstawione są wyniki na wykresach
+
+\subsection{Funkcja sigmoidalna}
 
 \begin{table}[h]
   \centering
@@ -267,98 +274,44 @@ liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
   \def\arraystretch{1.3}
   \begin{tabular}{|l|l|l|l|}
   \hline
-  Wielkość paczki & Błąd & Skuteczność \\ \hline
-  10 & 0.15 & 9440 \\ \hline
-  50 & 0.15 & 9400 \\ \hline
-  100 & 0.19 & 9312 \\ \hline
-  500 & 0.31 & 9053 \\ \hline
-  1000 & 0.39 & 8893 \\ \hline
-  10000 & 0.39 & 8884 \\ \hline
-  60000 & 0.38 & 8902 \\ \hline
+  Metoda inicjalizacji & Błąd & Skuteczność \\ \hline
+  Rozkład normalny $\sigma = 0.1$ & 1.43 & 6649.3 \\ \hline
+  Xavier & 1.18 & 7416.43 \\ \hline
+  He & 1.17 & 7543.632 \\ \hline
   \end{tabular}
   \egroup
   \vspace{10pt}
-  \caption{Wielkość paczki}
+  \caption{Inicjalizacja wag - funkcja sigmoidalna}
 \end{table}
 
 \newpage
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_10.png}
+  \includegraphics[width=\linewidth]{error_xavier_sigmoidF.png}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_10.png}
+  \includegraphics[width=\linewidth]{test_xavier_sigmoidF.png}
 \end{figure}
 
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_50.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_50.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_100.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_100.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_500.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_500.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_1000.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_1000.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_2000.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_2000.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/error_batch_size_60000.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{batchSize/test__batch_size_60000.png}
-\end{figure}
+Od razu można zauważyć, że prędkość oraz skuteczność znacząco rośnie w porównaniu do użycia samego rozkładu normalnego.
 
 \newpage
-\subsection{Test inicjalizacji wartości wag}
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\linewidth]{error_he_sigmoidF.png}
+\end{figure}
 
-Zbadano jak sposób inicjalizacji wag wpływa na spadek błędu i skuteczność sieci. Do inicjalizacji wag wykorzystano rozkład normalny.
-Mediana ustawiona jest zawsze na zero, a badany jest wpływ zmiany odchylenia standardowego. 
-W tabelce zawarty jest uśredniony błąd oraz oraz uśredniona liczba prawidłowo rozpoznanych
-liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\linewidth]{test_he_sigmoidF.png}
+\end{figure}
+
+Wyniki są zbliżone do metody xaviera - prędkość uczenia właściwie się nie zmienia, a skuteczność nieznacznie rośnie.
+
+\newpage
+\subsection{Funkcja ReLU}
 
 \begin{table}[h]
   \centering
@@ -367,211 +320,78 @@ liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
   \def\arraystretch{1.3}
   \begin{tabular}{|l|l|l|l|}
   \hline
-  Sigma & Błąd & Skuteczność \\ \hline
-  0.1 & 0.1 & 9504 \\ \hline
-  0.2 & 0.11 & 9466 \\ \hline
-  0.3 & 0.13 & 9441 \\ \hline
-  0.4 & 0.13 & 9411 \\ \hline
-  0.5 & 0.17 & 9332 \\ \hline
-  0.6 & 0.18 & 9312 \\ \hline
-  0.7 & 0.2 & 9281 \\ \hline
-  0.8 & 0.22 & 9271 \\ \hline
-  0.9 & 0.24 & 9155 \\ \hline
-  1 & 0.27 & 9146 \\ \hline
+  Metoda inicjalizacji & Błąd & Skuteczność \\ \hline
+  Rozkład normalny $\sigma = 0.1$ & 0.6 & 8450.87 \\ \hline
+  Xavier & 0.48 & 8813.91 \\ \hline
+  He & 0.48 & 8799.37 \\ \hline
   \end{tabular}
   \egroup
   \vspace{10pt}
-  \caption{Wielkość odchylenia standardowego}
+  \caption{Inicjalizacja wag - funkcja ReLU}
 \end{table}
 
 \newpage
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.1.png}
+  \includegraphics[width=\linewidth]{error_xavier_ReLU.png}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.1.png}
+  \includegraphics[width=\linewidth]{test_xavier_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.2.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.2.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.3.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.3.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.4.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.4.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.5.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.5.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.6.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.6.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.7.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.7.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.8.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.8.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_0.9.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_0.9.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/error_weight_1.0.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{weight/test_weight_1.0.png}
-\end{figure}
-
-
-\subsection{Test funkcji aktywacji}
-
-W sieci neuronowej przetestowano 3 różne funkcje aktywacji: sigmoidalną, tangensa hiperbolicznego oraz softplus.
-W tabelce zawarty jest uśredniony błąd oraz oraz uśredniona liczba prawidłowo rozpoznanych
-liczb ze zbioru testowego. Niżej przedstawione są wyniki na wykresach.
-
-\begin{table}[h]
-  \centering
-    
-  \bgroup
-  \def\arraystretch{1.3}
-  \begin{tabular}{|l|l|l|l|}
-  \hline
-  Funkcja aktywacji & Błąd & Skuteczność \\ \hline
-  sigmoid & 0.65 & 8021 \\ \hline
-  tanh & 0.17 & 9380 \\ \hline
-  softplus & 0.24 & 9270 \\ \hline
-  \end{tabular}
-  \egroup
-  \vspace{10pt}
-  \caption{Funckja aktywacji}
-\end{table}
+W przypadku funkcji ReLU nie widać aż tak dużej zmiany jak to było w przypadku funkcji sigmoidalnej - jest ale mniej widoczna.
 
 \newpage
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{activation/error_activation_sigmoid.png}
+  \includegraphics[width=\linewidth]{error_he_ReLU.png}
 \end{figure}
 
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\linewidth]{activation//test_activation_sigmoid.png}
+  \includegraphics[width=\linewidth]{test_he_ReLU.png}
 \end{figure}
 
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{activation/error_activation_tanh.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{activation/test_activation_tanh.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{activation/error_activation_softplus.png}
-\end{figure}
-
-\begin{figure}[]
-  \centering
-  \includegraphics[width=\linewidth]{activation/test_activation_softplus.png}
-\end{figure}
+Poprawa nie jest zauważalna - wyniki są na poziomie metody xaviera.
 
 \section{Wnioski}
 
-\subsection{Wielkość sieci}
+\subsection{Optymaliztory współczynnika uczenia}
 
-Ilość warstw ukrutych wydaje się nie wpływać znacząco na skuteczność sieci. Ilość neuronów na warstwę ma z kolei widoczny pozytywny wpływ.
-Duże ilości z zwiększają rozmiary matryc i ilości działań które należy wykonać, zabierają zatem więcej czasu.
+Dobranie współczynnika uczenia nie jest prostym zadaniem - jeśli jest zbyt duży proces uczenia może okzać się niezbieżny.
+Zbyt mały z kolei może skutkować bardzo wolnym uczeniem się sieci. Największy wpływ na dobór współczynnika uczenia ma kształt funkcji kosztu,
+a ten jest bardzo zmienny. Należy zatem dostosować ten współczynnik w trakcie uczenia.
 
-\subsection{Współczynnik uczenia}
+Momentum pomaga metodzie SGD na wyjście z minimum lokalnego biorąc pod uwagę prędkość w poprzednim kroku.
+Momentum Nesterova dodatkowo bierze pod uwagę przewidywanie następnej pozycji.
+Adagrad zmienia współczynnik uczenia w zależności od parametrów - sumuje kwadraty wszystkich gradientów.
+Adadelta ogranicza sumowanie gradientów do pewnego rozmiaru.
+Adam używa zarówno poprzednich gradientów, jak i przeszłych kwadratów gradientów.
 
-Najlepszy wynik uzyskany został dla pośredniej wartości 0.5. Zbyt niski wynik dawał wysoki błąd, a wraz z wzrost powyżej
-optymalnej wartości błąd również spadał. Niski współczynnik uczenia możę wyuczyć sieć lepiej, jednak wymaga ona przejścia przez więcej epok.
-Zbyt duży współczynnik może spowodować, że sieć przeoczy optymalny punkt w któym najlepiej rozpoznaje wzorce.
+Eksperymenty wskazują, że wszystkie optymalizatory znacząco ulepszają prędkość jak i skuteczność nauki sieci. 
+Najlepsze wyniki osiąga optymalizator Adam.
 
-\subsection{Wielkość paczki}
 
-Testy wskazują że mniejsza wielkość paczki skutkuje poprawą wyników. Mała wielkość paczki ma za zadanie
-poprawić prędkość działania sieci, za cenę wprowadzenia szumu, czyli pewnych niedokładności. Można zauważyć że dla większych wartości paczki
-mimo że średni wynik jest gorszy niż te niższe, to dla każdej epoki jest on bardziej stabilny - wyniki są na jednym poziomie.
+\subsection{Metody inicjalizacji wag}
 
-\subsection{Sposób inicjalizacji wag}
+Jest bardzo istotne aby podczas projektowania sieci neuronowej wziąć pod uwagę sposób inicjalizacji wag. Inicjalizacja wag jest
+punktem początkowym uczenia i może zaważyć na skuteczności sieci. Złe dobranie wag może pogorszyć skuteczność sieci, a nawet uniemożliwić naukę.
+Zbyt niskie wagi mogą potencjalnie bardzo spowolnić uczenie sieci - problem zanikającego gradientu. Z kolei zbyt wysoka inicjalizacja może
+skutkować bardzo dużymi liczbami w trakcie uczenia, które będą powodowały przekroczenie zakresu liczb w komputerze - problem wybuchającego gradientu.
 
-Im mniejsze odchylenie standardowe tym można zauważyć lepsze wyniki - chcemy zatem aby wartości były bliskie 0. Zbyt duże odchylenie standardowe
-skutkuje mniejszą dokłądnością sieci.
+Generalnie wagi powinny być inicjalizowane jako niewielkie wartości w pobliżu 0. Wybór rozkładu normalnego o odchyleniu standardowym = 0.1 jest prawidłowe.
 
-\subsection{Użyta funkcja aktywacji}
+Metoda Xaviera ma na celu zachować stałą wariancję od warstwy do warstwy w obu kierunkach, aby sieć mogła uczyć się optymalnie.
 
-Można zauważyć, że z zadanym problemem najlepiej radzi sobie funkcja tangensa hiperbolicznego. Niewiele gorzej spisuje się
-funkcja softplus (użyta jako substyt funkcji ReLU). Dużą niestabilnością wykazuje się funkcja sigmoidalna.
+Ze względu na to, że funkcja ReLU zwraca wynik 0 dla wartości ujemnych - połowa wariancji będzie taka sama jak w przypadku metody xaviera, a połowa będzie równa 0.
+Należało zatem zmodyfikować wzór, aby przyjmował liczbę wejść zmniejszoną o połowę.
 
-\vspace{30pt}
-Przedstawione wsnioski odnoszą się do problemu rozwiązywanego na zajęciach, czyli rozpoznawania liczb ze zbioru MIST.
-Mogą one nie być uniwersalne i dla innych rodzajów problemów inne hiperparametry mogą okazać się skuteczniejsze.
+Eksperymetny wskazują, że wykorzystanie wymienionych metod okazuje się być lepsze, niż teoretycznie poprawne wykorzytanie samego rozkłądu normalnego o niskim odchyleniu standardowym.
+Metoda He została stworzona jako lepsza alternatywa dla metody xaviera w przypadku wykorzystania funkcji ReLU.
+Wyniki eksperymentów są jednak na tym samym poziomie co metoda xaviera - badania autora wykazały lepszą skuteczność na bardzo głębokich sieciach,
+dlatego tutaj poprawa może się nie uwidaczniać.
 
 
 \end{document}

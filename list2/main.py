@@ -231,7 +231,7 @@ def optimizerTests(trainingData, testData):
 def weightsInitTest(trainingData, testData):
 
     weightInits = [xavier, he]
-    activationFuncs = [softplusF]
+    activationFuncs = [sigmoidF]
 
     for activation in activationFuncs:
         for weightInit in weightInits:
@@ -246,7 +246,7 @@ def weightsInitTest(trainingData, testData):
                     s = []
                 neuralNetwork = NeuralNetworkLayer(inputVectorSize, 20, 0.01, activation, weightInit, s)
                 generateNetwork(neuralNetwork, [], 10, 0.01, activation, weightInit, [])
-                errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, nestrovMomentum)
+                errors, avgError, passedTestsList, avgPass = trainNeuralNetwork(trainingData, testData, neuralNetwork, None)
 
                 if(len(totalErrors) < 1):
                     totalErrors = errors
@@ -260,10 +260,10 @@ def weightsInitTest(trainingData, testData):
 
             for i in range(len(totalErrors)):
                 totalErrors[i] = totalErrors[i] / 10
-                totalPassedTests[i] = totalErrors[i] / 10
+                totalPassedTests[i] = totalPassedTests[i] / 10
 
             name1 = weightInit.__name__
-            name2 = "ReLU"
+            name2 = activation.__name__
 
             plt.title(f"Wielkość błędu dla {name1} oraz {name2}")
             plt.xlabel("Epoka")
@@ -290,8 +290,8 @@ if __name__ == '__main__':
     # # load mnist training data
     trainingData, testData = loadData()
     inputVectorSize = len(trainingData[0].inputs)
-    optimizerTests(trainingData, testData)
-    # weightsInitTest(trainingData, testData)
+    # optimizerTests(trainingData, testData)
+    weightsInitTest(trainingData, testData)
     
     # # create first layer with 4 neurons
     # neuralNetwork = NeuralNetworkLayer(inputVectorSize, 20, 0.01, sigmoidF, normalDistribution, [0, 0.1])
